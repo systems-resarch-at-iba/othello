@@ -1,0 +1,26 @@
+steps:
+  # Checkpoint is never committed to git (see .gitignore); pull it from GCS
+  # into the build context so the Dockerfile's `COPY . .` bakes it into the
+  # image. Rebuilds when the model changes, not on every request.
+  - name: gcr.io/cloud-builders/gsutil
+    args: ['cp', 'gs://srai-othello-models/models/model-alpha3S-v2.1.pth.tar', 'backend/models/model-alpha3S-v2.1.pth.tar']
+
+  - name: gcr.io/cloud-builders/docker
+    args: ['build', '-t', 'asia-south1-docker.pkg.dev/srai-othello/othello-backend/othello-backend:$BUILD_ID', 'backend']
+
+  - name: gcr.io/cloud-builders/docker
+    args: ['push', 'asia-south1-docker.pkg.dev/srai-othello/othello-backend/othello-backend:$BUILD_ID']
+
+  - name: gcr.io/cloud-builders/gcloud
+    entrypoint: gcloud
+    args:
+      - run
+      - deploy
+      - othello-backend
+      - --image=asia-south1-docker.pkg.dev/srai-othello/othello-backend/othello-backend:$BUILD_ID
+      - --region=asia-south1
+      - --platform=managed
+      - --allow-unauthenticated
+
+images:
+  - asia-south1-docker.pkg.dev/srai-othello/othello-backend/othello-backend:$BUILD_ID
