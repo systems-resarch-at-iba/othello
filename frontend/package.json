@@ -1,0 +1,32 @@
+{
+  "name": "@othello/frontend",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "lint": "eslint .",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "recharts": "^3.10.1"
+  },
+  "peerDependencies": {
+    "react": "^19",
+    "react-dom": "^19"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "@vitejs/plugin-react": "^5.0.0",
+    "eslint": "^9",
+    "eslint-plugin-react-hooks": "^5",
+    "jsdom": "^25.0.0",
+    "typescript": "^5",
+    "typescript-eslint": "^8",
+    "vitest": "^3.0.0"
+  }
+}
