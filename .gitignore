@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+*.egg-info/
+.pytest_cache/
+backend/models/
+backend/logs/
+
+# Node
+node_modules/
+dist/
+.vitest/
+
+# OS/editor
+.DS_Store
+*.swp

@@ -1,0 +1,40 @@
+name: Sync site submodule
+
+# Only fires when frontend/ actually changed: backend/ changes are irrelevant
+# to what site/ needs (it never imports backend/ at all), and a naive
+# unconditional sync would create a noisy submodule-bump commit on site's
+# main for every backend-only change, plus a pointlessly larger Vercel clone
+# of this whole repo (a submodule pulls the entire repo, backend/ included).
+on:
+  push:
+    branches: [main]
+    paths: ['frontend/**']
+
+jobs:
+  sync-site:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout site
+        uses: actions/checkout@v4
+        with:
+          repository: systems-resarch-at-iba/site
+          token: ${{ secrets.SITE_SYNC_TOKEN }}
+          submodules: true
+
+      - name: Bump vendor/othello submodule to this commit
+        run: |
+          cd vendor/othello
+          git fetch origin "$GITHUB_SHA"
+          git checkout "$GITHUB_SHA"
+          cd ../..
+
+          if git diff --quiet -- vendor/othello; then
+            echo "vendor/othello submodule already up to date, nothing to sync."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add vendor/othello
+          git commit -m "Sync vendor/othello submodule to othello@${GITHUB_SHA:0:7}"
+          git push
