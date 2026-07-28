@@ -24,3 +24,12 @@ steps:
 
 images:
   - asia-south1-docker.pkg.dev/srai-othello/othello-backend/othello-backend:$BUILD_ID
+
+# Required once a non-default service account is set on the build (the
+# trigger uses othello-deploy, forced by org policy): the legacy
+# GCS-bucket log storage isn't compatible with a custom service account,
+# so logs must be routed to Cloud Logging explicitly instead. Manual
+# `gcloud builds submit` runs never hit this -- those used the default
+# Cloud Build service account, which the legacy behavior is fine with.
+options:
+  logging: CLOUD_LOGGING_ONLY
