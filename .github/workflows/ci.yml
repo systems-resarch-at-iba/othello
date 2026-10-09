@@ -35,7 +35,10 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install --index-url https://download.pytorch.org/whl/cpu --extra-index-url https://pypi.org/simple -r requirements.txt
-      - run: pip install pytest httpx
+      - run: pip install pytest httpx pybind11==3.1.0
+      - run: cmake -S cpp -B cpp/build -DPython3_EXECUTABLE=$(which python)
+      - run: cmake --build cpp/build -j 2
+      - run: ctest --test-dir cpp/build --output-on-failure
       # Not a bare `pytest`: python -m pytest adds the cwd (backend/) to
       # sys.path, which is what lets `from board import ...` / `from main
       # import app` resolve at all. A bare `pytest` invocation doesn't add

@@ -1,0 +1,10 @@
+region,operation,mean_ms,n_boards
+start,get_valid_moves,0.012682078295620158,5
+start,get_next_state,0.01052215289673768,5
+start,get_game_ended,0.006367192801553756,5
+mid,get_valid_moves,0.016134002100443467,5
+mid,get_next_state,0.015990829101065175,5
+mid,get_game_ended,0.008524625597056001,5
+end,get_valid_moves,0.01932195489644073,5
+end,get_next_state,0.02258538469905034,5
+end,get_game_ended,0.01185451308847405,5

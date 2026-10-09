@@ -3,11 +3,9 @@ from pydantic import BaseModel, Field
 
 
 class _EngineParams(BaseModel):
-    # Capped at the default itself for now: on a public, unauthenticated,
-    # pay-per-use backend, the ceiling directly bounds the worst-case cost of
-    # a single request. Revisit once the search itself is faster (planned
-    # C++ port) and there's headroom to raise this again.
-    num_mcts_sims: int = Field(default=500, ge=1, le=500)
+    # On a public, unauthenticated, pay-per-use backend, the ceiling directly
+    # bounds the worst-case cost of a single request.
+    num_mcts_sims: int = Field(default=500, ge=1, le=5000)
     # See MCTS.get_dynamic_cpuct: 'static' uses a fixed exploration constant,
     # 'increment'/'decrement' scale it based on how many times the current
     # position has been visited, approaching/leaving c_puct as a bound.

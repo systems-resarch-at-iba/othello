@@ -1,0 +1,43 @@
+{
+  "timestamp": "2026-10-08T00:09:35+05:00",
+  "cpu_model": "13th Gen Intel(R) Core(TM) i9-13900HX",
+  "cpu_flags": [
+    "avx",
+    "avx2",
+    "avx_vnni",
+    "bmi2",
+    "f16c",
+    "fma",
+    "popcnt"
+  ],
+  "pinned_cpu": 8,
+  "pinned_cpu_max_mhz": "5400000",
+  "pinned_cpu_cur_khz_at_start": "3314628",
+  "governor": "performance",
+  "perf_event_paranoid": "1",
+  "load_average": [
+    2.52392578125,
+    1.8486328125,
+    1.58349609375
+  ],
+  "logical_cpus": 32,
+  "kernel": "7.0.0-34-generic",
+  "python": "3.12.3",
+  "torch": "2.13.0+cpu",
+  "torch_threads_default": 24,
+  "numpy": "2.5.1",
+  "compiler": "g++ (Ubuntu 12.4.0-2ubuntu1~24.04.1) 12.4.0",
+  "cmake_build_type": "",
+  "cmake_cxx_flags_release": "-O3 -DNDEBUG",
+  "git_head": "98a26ec654ad61da02475ffe7db2839165465402",
+  "git_dirty": true,
+  "sha256": {
+    "checkpoint": "c6f8866519cb0c4925ade3ccc396979d4d4b551735d6b9c634e99042d3df0344",
+    "weights_fp32": "4d5b8fb9dbe62fd1ab3c10e70d488213c187d757c1f255b4d2593f0438632128",
+    "weights_fp16": "e9f80f0ee026ac8d02ff1db3f0182ab895046c66f72942d33e6e2f3cb48f87e8",
+    "bench_net": "c23c5c3472e5271e7f7eabbe6379eae134c4bdf1c088b1abcfb9014c49e99082",
+    "bench_peaks": "54b69efbe02f16ad65d18f1d3abf8aabc369bc0fc317118372c5b97051614b3a",
+    "bench_rules": "88e819fd8548eea78ccccfb57e1aa87f98bf2fc06014acb79aa2672c68a6be2d",
+    "othello_cpp.cpython-312-x86_64-linux-gnu.so": "6e87a15501f8287ba147ca0e952542759bbc7e271c2fa3657753051d168e7685"
+  }
+}

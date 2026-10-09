@@ -5,13 +5,18 @@ __pycache__/
 *.egg-info/
 .pytest_cache/
 backend/models/
-backend/logs/
+backend/cpp/build/
+*.bin
+logs/
 
 # Node
 node_modules/
 dist/
 .vitest/
 
+.envrc
+
 # OS/editor
 .DS_Store
 *.swp
+.vscode/

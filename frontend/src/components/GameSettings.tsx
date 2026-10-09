@@ -51,7 +51,7 @@ export function GameSettings({
           MCTS simulations
           <NumberField
             min={1}
-            max={500}
+            max={5000}
             value={settings.numMctsSims}
             onChange={(n) => onSettingsChange({ ...settings, numMctsSims: n })}
           />

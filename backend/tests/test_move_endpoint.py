@@ -97,7 +97,7 @@ def test_move_accepts_each_cpuct_type(client):
 def test_move_rejects_an_out_of_range_sim_count(client):
     response = client.post("/move", json={"board": [0] * 64, "player": 1, "num_mcts_sims": 0})
     assert response.status_code == 422
-    response = client.post("/move", json={"board": [0] * 64, "player": 1, "num_mcts_sims": 5000})
+    response = client.post("/move", json={"board": [0] * 64, "player": 1, "num_mcts_sims": 10001})
     assert response.status_code == 422
 
 

@@ -1,3 +1,4 @@
+import logging
 import os
 import time
 from contextlib import asynccontextmanager
@@ -8,10 +9,42 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from arch import CNN_vAlpha3, args
 from board import Utils as BU
-from engine import OthelloAI
+from engine import CppAI, OthelloAI
+from engine.cpp_ai import MAX_TREE_NODES
 from schemas import HealthResponse, HintRequest, HintResponse, MoveRequest, MoveResponse
 
-ai: OthelloAI | None = None
+ai: OthelloAI | CppAI | None = None
+
+# Uvicorn's own logger, so that these lines reach the server log (Cloud
+# Logging on Cloud Run) at INFO level without extra logging configuration.
+logger = logging.getLogger("uvicorn.error")
+
+
+def _log_engine(engine: OthelloAI | CppAI | None) -> None:
+    """
+    Logs which engine serves requests and which CPU path it uses.
+
+    Parameters
+    ----------
+    engine : OthelloAI or CppAI or None
+        The engine chosen at startup, or None when no model is loaded.
+    """
+    if engine is None:
+        logger.error("engine: none, the model checkpoint was not found, so /move and /hints return 503")
+    elif isinstance(engine, CppAI):
+        logger.info(
+            "engine: C++ (instruction set %s, batch size %d, tree limit %d positions)",
+            engine.isa,
+            engine.mcts.batch_size,
+            MAX_TREE_NODES,
+        )
+        if engine.isa != "avx2":
+            logger.warning(
+                "the C++ engine runs its plain-loop network because this CPU lacks AVX2, FMA or F16C; "
+                "searches are much slower than with AVX2"
+            )
+    else:
+        logger.info("engine: Python (single-threaded, the slower fallback)")
 
 
 @asynccontextmanager
@@ -20,11 +53,21 @@ async def lifespan(app: FastAPI):
     # Qsa/Nsa/Ns/Ps/Es/Vs dicts are keyed by Zobrist hash of the position, so
     # sharing them across concurrent games behaves like a shared transposition
     # table, not a correctness bug, and avoids one CNN copy in memory per game.
+    #
+    # The C++ engine serves requests when its extension is built, and the
+    # Python engine serves them otherwise. Both load the same checkpoint.
     global ai
     try:
-        ai = OthelloAI(cnn=CNN_vAlpha3, args=args, version=args.version)
+        ai = CppAI(args=args, version=args.version)
+    except ImportError as error:
+        logger.warning("the C++ engine is unavailable (%s), falling back to the Python engine", error)
+        try:
+            ai = OthelloAI(cnn=CNN_vAlpha3, args=args, version=args.version)
+        except FileNotFoundError:
+            ai = None
     except FileNotFoundError:
         ai = None
+    _log_engine(ai)
     yield
 
 
@@ -60,7 +103,11 @@ def health() -> HealthResponse:
     # ai.mcts.cnn is the OthelloCNN wrapper; .cnn on *that* is the actual
     # nn.Module (CNN_vAlpha3) -- counts the real loaded network's parameters
     # rather than assuming a figure.
-    parameter_count = sum(p.numel() for p in ai.mcts.cnn.cnn.parameters())
+    parameter_count = (
+        ai.parameter_count
+        if isinstance(ai, CppAI)
+        else sum(p.numel() for p in ai.mcts.cnn.cnn.parameters())
+    )
     return HealthResponse(
         status="ok",
         model_version=args.version,
@@ -94,7 +141,10 @@ def move(request: MoveRequest) -> MoveResponse:
 
     board = np.array(request.board, dtype=np.int8).reshape(8, 8)
     start = time.perf_counter()
-    selected = ai.select_move(board, request.player)
+    try:
+        selected = ai.select_move(board, request.player)
+    except ValueError as error:
+        raise HTTPException(status_code=422, detail=str(error))
     elapsed_ms = (time.perf_counter() - start) * 1000
     return MoveResponse(move=selected, elapsed_ms=elapsed_ms)
 
@@ -115,6 +165,9 @@ def hints(request: HintRequest) -> HintResponse:
     # temperature=1 returns the raw visit-count distribution (how much
     # search budget each move actually got), not the deterministic argmax
     # select_move uses -- that's what makes a probability gradient possible.
-    probs = ai.mcts.get_action_probs(canonical_board, temperature=1)
+    try:
+        probs = ai.mcts.get_action_probs(canonical_board, temperature=1)
+    except ValueError as error:
+        raise HTTPException(status_code=422, detail=str(error))
     elapsed_ms = (time.perf_counter() - start) * 1000
     return HintResponse(probs=probs, elapsed_ms=elapsed_ms)
