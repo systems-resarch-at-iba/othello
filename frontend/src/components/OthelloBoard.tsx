@@ -20,7 +20,7 @@ interface OthelloBoardProps {
 export function OthelloBoard({ apiBaseUrl }: OthelloBoardProps) {
   const [humanPlayer, setHumanPlayer] = useState<Player>(-1)
   const [settings, setSettings] = useState<EngineSettings>(DEFAULT_ENGINE_SETTINGS)
-  const [showMoveHints, setShowMoveHints] = useState(true)
+  const [showMoveHints, setShowMoveHints] = useState(false)
   const [showAiHints, setShowAiHints] = useState(true)
   const [latencyHistory, setLatencyHistory] = useState<number[]>([])
 
